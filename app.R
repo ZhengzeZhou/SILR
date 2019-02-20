@@ -13,8 +13,8 @@ ui <- fluidPage(
       helpText("SILR is abbreviated for single-individual likelihood ratios, which is a new exact test for demonstrating that an effect exists in binary trials."),
       
       helpText("References: "),
-      
-      helpText("Each participant in your study has undergone t binary trials, succeeding or failing on each trial. List t+1 non-negative integers showing the number of participants who achieved each number of successes from 0 to t. List them in that order, separated by commas."),
+    
+      helpText(HTML("Each participant in your study has undergone <i>t</i> binary trials, succeeding or failing on each trial. List <i>t+1</i> non-negative integers showing the number of participants who achieved each number of successes from 0 to <i>t</i>. List them in that order, separated by commas.")),
       
       textInput("hitfreq", label = "", value = "6, 10, 8, 5, 4, 2"), 
       
@@ -43,11 +43,21 @@ ui <- fluidPage(
       
       numericInput("ri", label = "", value = 0.01),
       
+      helpText(HTML("Do you want to output confidence limit on <i>pmax</i>?")),
+      
+      selectInput("pmax", 
+                  label= "",
+                  choices = c("yes", "no"),
+                  selected = "yes"),
+      
       actionButton("go", "Calculate")
     ),
     
     mainPanel(textOutput("selected_type"),
               textOutput("entered_vec"),
+              h4("Input: "),
+              htmlOutput("input"),
+              h4("Result: "),
               htmlOutput("result"))
   )
 )
@@ -65,6 +75,26 @@ server <- function(input, output) {
   # output$entered_vec <- renderText({
   #   paste("You have entered", Vals())
   # })
+  
+  output$input <- renderUI({ 
+    hnum <- switch(input$type, 
+                   "upper-tail" = 1,
+                   "lower-tail" = 2,
+                   "some-tail" = 3)
+    
+    prompt_input <- "Input values:"
+    str_N <- paste("number of participants <i>N</i> = ", sum(Vals()))
+    str_type <- paste("type of test = ", input$type)
+    str_t <- paste("number of binary trials <i>t</i> for each participant = ", length(input$hitfreq) - 1)
+    str_pnull <- paste("<i>pnull</i> = ", input$pnull)
+    str_ri <- paste("rounding interval <i>ri</i> = ", input$ri)
+    str_alpha <- paste("significance level <i>alpha</i> = ", input$alpha)
+    str_hitfreq <- paste("number of participants with each possible number of hits = ", input$hitfreq)
+    
+    
+    HTML(paste(str_type, str_N, str_t, str_pnull, str_ri, str_alpha, str_hitfreq, sep = '<br/>'))
+    
+  })  
 
   output$result <- renderUI({ 
     hnum <- switch(input$type, 
@@ -78,15 +108,60 @@ server <- function(input, output) {
     
     ri <- input$ri
     
+    pmax_yn <- switch(input$pmax, 
+                   "yes" = 1,
+                   "no" = 0)
+    
     # hitfreq <- as.numeric(unlist(strsplit(input$hitfreq,",")))
     
-    ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
     
-    str1 <- paste("maxnsn = ", ans$maxnsn, ", ", "pstoohigh = ",  ans$pstoohigh)
-    str2 <- paste("ntoolarge = ", ans$ntoolarge, ", ", "pstoolow = ", ans$pstoolow)
-    str3 <- paste("withtrait = ", ans$withtrait)
+    full <- SILR(hnum = hnum, alpha = 0, pnull = pnull, ri = ri, hitfreq = Vals())
     
-    HTML(paste(str1, str2, str3, sep = '<br/>'))
+    if (full$pstoohigh > alpha) {
+      str_full <- paste("full sample ps = ", full$pstoohigh)
+      str <- "No confidence limits were printed because <i>ps</i> > <i>alpha</i>."
+      
+      HTML(paste(str_full, str, sep = '<br/>'))          
+                  
+    } else{
+      
+      if (pmax_yn == 0) {
+        str_full <- paste("full sample ps = ", full$pstoohigh)
+        
+        ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
+        
+        str1 <- paste("maxnsn = ", ans$maxnsn, ", ", "pstoohigh = ",  ans$pstoohigh)
+        str2 <- paste("ntoolarge = ", ans$ntoolarge, ", ", "pstoolow = ", ans$pstoolow)
+        str3 <- paste("withtrait = ", ans$withtrait)
+        
+        str_full <- paste("full sample ps = ", full$pstoohigh)
+        
+        HTML(paste(str_full, str1, str2, str3, sep = '<br/>'))
+      } else {
+        str_full <- paste("full sample ps = ", full$pstoohigh)
+        
+        ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
+        
+        str1 <- paste("maxnsn = ", ans$maxnsn, ", ", "pstoohigh = ",  ans$pstoohigh)
+        str2 <- paste("ntoolarge = ", ans$ntoolarge, ", ", "pstoolow = ", ans$pstoolow)
+        str3 <- paste("withtrait = ", ans$withtrait)
+        
+        str_full <- paste("full sample ps = ", full$pstoohigh)
+        
+        ans = findPmaxlog(hnum, alpha, pnull = 0.04, ri = ri, printallps = 0, hitfreq = Vals(), tol = 1e-2)
+        
+        pmax = ans$xv[length(ans$xv)]
+        
+        str4 <- paste("confidence limit on <i>pmax</i> = ", pmax)
+        
+        HTML(paste(str_full, str1, str2, str3, str4, sep = '<br/>'))
+      }
+
+    }
+    
+
+    
+    
     
   })  
   
