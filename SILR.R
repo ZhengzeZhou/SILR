@@ -1,36 +1,33 @@
+# load library
 library(cladoRcpp)
 
 SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0, hitfreq = c(6, 10, 8, 5, 4, 2)) {
-  # 1. Enter parameters and data, and find n
-
-  # hnum <- 2 # 1 for an upper-tail test;2 for a lower-tail test; 3 for a some-tail test
-  # usefft <- 0 # 1 to use FFT; 0 otherwise
-  # alpha <- 0.05 # significance level, often 0.05 or 0.01
-  # pnull <- 0.2 # the probability of a correct answer on each trial if the numm H is true
-  # t <- 5 # the number of trials each participant undergoes
-  # ri <- 0.01 # "rounding interval", usually set to 0.01
-  # printallps <- 0 # whether to print all values of ps
-
-  # # a vector of t+1 values showing the number of participants who got each number of hits from 0 to t
-  # # hitfreq <- c(6, 10, 8, 5, 4, 2) 
-  # hitfreq <- c(60, 109, 80, 50, 40, 20) 
-  # # hitfreq <- c(200, 100, 80, 50, 40, 20)
-
-  # if (alpha < 1e-12){
-  #   alpha <- 1e-12
-  # }
-
-  # t1 <- hsec
+  # Main function for executing single-individual likelihood ratio test.
+  #
+  # Args:
+  #   hum: Integer denoting type of test. 1 for an upper-tail test;2 for a lower-tail test; 3 for a some-tail test. 
+  #        Default is 1.
+  #   alpha: Significance level. Default is 0.05.
+  #   pnull: Probability of success (a hit) on each trial under null hypothesis. Default to 0.2.
+  #   ri: Rounding interval. Default is 0.01. 
+  #   printallps: Whether to print all values of ps. 1 for Yes and 0 for No. Default is 0. Note that this feature 
+  #               is not displayed in the Shiny app currently.
+  #   hitfreq: Vector of length t+1. It is the number of participants who achieved each number of successes from 0 to t.
+  #            Default set to c(6, 10, 8, 5, 4, 2).
+  #
+  # Returns:
+  #   List containing maxnsn, pstoohigh, ntoolarge, pstoolow and withtrait.
+  
 
   n <- sum(hitfreq) # the number of participants
 
 
-  # 2. Construct p1
   t = length(hitfreq) - 1
   
   xup <- 0:t
-  # calculate the vector showing the probability under the null that 
-  # any one participant will get each possible number of hits from 0 to t
+  
+  # calculate the vector showing the probability under the null that any one participant will get each possible number 
+  # of hits from 0 to t
   probH0 <- factorial(t) / (factorial(xup) * factorial(t - xup)) * pnull ^ xup * (1 - pnull) ^ (t - xup) 
   # entry j is the probability of j-1 hits under the H which maximized that probability
   probH1 <- factorial(t) / (factorial(xup) * factorial(t - xup)) * (xup / t) ^ xup * (1 - xup / t) ^ (t - xup)
@@ -70,7 +67,7 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
   store <- list()
   store[["1"]] <- p1
 
-  # 3. Doubling convolutions
+  # Doubling convolutions
   nt <- 1
   currentvec <- p1
   ntoolarge <- n + 1
@@ -153,8 +150,25 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
 
 }
 
-
 findPmax <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-2) {
+  #  Main function for finding confidence limits on pmax. 
+  #
+  # Args:
+  #   hum: Integer denoting type of test. 1 for an upper-tail test;2 for a lower-tail test; 3 for a some-tail test. 
+  #        Default is 1.
+  #   alpha: Significance level. Default is 0.05.
+  #   pnull: Probability of success (a hit) on each trial under null hypothesis. Default to 0.04.
+  #   ri: Rounding interval. Default is 0.01. 
+  #   printallps: Whether to print all values of ps. 1 for Yes and 0 for No. Default is 0. Note that this feature 
+  #               is not displayed in the Shiny app currently.
+  #   hitfreq: Vector of length t+1. It is the number of participants who achieved each number of successes from 0 to t.
+  #            Default set to c(1, 5, 10, 10, 6, 5).
+  #   tol: Tolerance level denote the accuracy of final result. Default is 0.01.
+  #
+  # Returns:
+  #   List containing:
+  #     xv_log: Vector containing values of pnulls tried in each iteration. 
+  #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
   
   ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
   
@@ -213,6 +227,25 @@ findPmax <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps
 }
 
 findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-2) {
+  # Same functionality as findPmax, except that we use logarithm in the process of deciding next value to evaluate for better approximation. 
+  #
+  # Args:
+  #   hum: Integer denoting type of test. 1 for an upper-tail test;2 for a lower-tail test; 3 for a some-tail test. 
+  #        Default is 1.
+  #   alpha: Significance level. Default is 0.05.
+  #   pnull: Probability of success (a hit) on each trial under null hypothesis. Default to 0.04.
+  #   ri: Rounding interval. Default is 0.01. 
+  #   printallps: Whether to print all values of ps. 1 for Yes and 0 for No. Default is 0. Note that this feature 
+  #               is not displayed in the Shiny app currently.
+  #   hitfreq: Vector of length t+1. It is the number of participants who achieved each number of successes from 0 to t.
+  #            Default set to c(1, 5, 10, 10, 6, 5).
+  #   tol: Tolerance level denote the accuracy of final result. Default is 0.01.
+  #
+  # Returns:
+  #   List containing:
+  #     xv_log: Vector containing values of pnulls tried in each iteration. 
+  #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
+
   
   ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
   
