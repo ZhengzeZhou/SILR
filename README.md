@@ -1,5 +1,4 @@
 # SILR
-# Description
 
 SILR is abbreviated for single-individual likelihood ratio test, which is described in the paper: ...
 
