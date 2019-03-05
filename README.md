@@ -3,7 +3,7 @@
 ## Description
 SILR is abbreviated for single-individual likelihood ratio test, which is described in the paper: ...
 
-This repository contains the main function [SILR.R](https://github.com/ZhengzeZhou/SILR/blob/master/SILR.R), and a correspongding [Shiny app](https://shiny.rstudio.com/) in [app.R](https://github.com/ZhengzeZhou/SILR/blob/master/app.R) for easy and interactive use. 
+This repository contains the main functions in [SILR.R](https://github.com/ZhengzeZhou/SILR/blob/master/SILR.R), and a correspongding [Shiny app](https://shiny.rstudio.com/) design in [app.R](https://github.com/ZhengzeZhou/SILR/blob/master/app.R) for easy and interactive use. 
 
 ## Installation
 To use the program, there are several options:
