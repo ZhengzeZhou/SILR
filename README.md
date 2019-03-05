@@ -13,8 +13,11 @@ To use the program, there are several options:
 1. Reviewers of the paper may directly access the Shiny program at https://zhengzez.shinyapps.io/silr/. It is emplyed by [shinyapps.io](https://www.shinyapps.io/). Please note that there is a budget limit on the total running time, and thus we will later remove this option.
 
 ## Usage
-
+Once installed, we believe the Shiny app is very easy to use. Below is a screenshot for the input section, with default values filled in automatically. You could enter your own inputs as well. 
 ![SILR_input](SILR_input.png)
+
+After click the calculate button, the program will display the output as shown below. It contains two parts: one for the input so you could check everything is correctly entered; and the other for several different output results.  
+![SILR_output](SILR_output.png)
 
 ## Contact 
 
