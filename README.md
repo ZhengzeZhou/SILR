@@ -15,4 +15,5 @@ To use the program, there are several options:
 ## Contact 
 
 Richard B. Darlington (rbd1@cornell.edu), Department of Psychology, Cornell University.
+
 Zhengze Zhou (zz433@cornell.edu), Department of Statistics, Cornell University.
