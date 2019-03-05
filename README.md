@@ -14,8 +14,7 @@ To use the program, there are several options:
 
 ## Usage
 
-![GitHub Logo](SILR_input.png)
-Format: ![Alt Text](url)
+![SILR_input](SILR_input.png)
 
 ## Contact 
 
