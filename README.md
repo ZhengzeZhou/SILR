@@ -1,5 +1,5 @@
 # SILR
-SILR is abbreviated for single-individual likelihood ratio test, which is described in the paper:...
+SILR is abbreviated for single-individual likelihood ratio test, which is described in the paper: ...
 
 To use the program, there are several options:
 
