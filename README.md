@@ -19,6 +19,8 @@ Once installed, we believe the Shiny app is very easy to use. Below is a screens
 After click the calculate button, the program will display the output as shown below. It contains two parts: one for the input so you could check everything is correctly entered; and the other for several different output results.  
 ![SILR_output](SILR_output.png)
 
+<img src="SILR_output.png" width="48">
+
 ## Contact 
 
 Richard B. Darlington (rbd1@cornell.edu), Department of Psychology, Cornell University.
