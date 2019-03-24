@@ -43,7 +43,7 @@ ui <- fluidPage(
       
       numericInput("ri", label = "", value = 0.01),
       
-      helpText(HTML("Do you want to output confidence limit on <i>pmax</i>?")),
+      helpText(HTML("Do you want to find a confidence limit on <i>pmax</i> or <i>pmin</i>?")),
       
       selectInput("pmax", 
                   label= "",
@@ -160,11 +160,17 @@ server <- function(input, output) {
         # str2 <- paste("ntoolarge = ", ans$ntoolarge, ", ", "pstoolow = ", ans$pstoolow)
         str3 <- paste("lower confidence limit on the number of experimental participants with the trait of interest = ", ans$withtrait)
         
-        ans = findPmaxlog(hnum, alpha, pnull = 0.04, ri = ri, printallps = 0, hitfreq = Vals(), tol = 1e-2)
+        ans = findPmaxlog(hnum, alpha, pnull = pnull, ri = ri, printallps = 0, hitfreq = Vals(), tol = 1e-2)
         
-        pmax = ans$xv[length(ans$xv)]
-        
-        str4 <- paste("lower confidence limit on pmax = ", round(pmax, digits = 6))
+        if (hnum == 1) {
+          pmax = ans$xv[length(ans$xv)]
+          
+          str4 <- paste("lower confidence limit on pmax = ", round(pmax, digits = 6))
+        } else {
+          pmin = ans$xv[length(ans$xv)]
+          
+          str4 <- paste("upper confidence limit on pmin = ", round(pmin, digits = 6))
+        }
         
         # HTML(paste(str_full, str1, str2, str3, str4, sep = '<br/>'))
         HTML(paste(str_full, str3, str4, sep = '<br/>'))

@@ -170,60 +170,118 @@ findPmax <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps
   #     xv_log: Vector containing values of pnulls tried in each iteration. 
   #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
   
-  ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  
-  if (ps > alpha) {
-    print("Current pnull already yields p value larger than alpha!")
-    return()
-  } 
-  
-  pg <- pnull
-  pnull <- (pg + 1) / 2 
-  ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  
-  while (ps < alpha) {
+  if (hnum == 1) {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
     pg <- pnull
     pnull <- (pg + 1) / 2 
     ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  }
-  
-  pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
-  pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
-  
-  if (abs(pg_e) < tol)
-    return(pg)
-  
-  if (abs(pnull_e) < tol)
-    return(pull)
-  
-  xv <- c(pg, pnull)
-  ev <- c(pg_e, pnull_e)
-  
-  xv_log <- c(pg, pnull)
-  ev_log <- c(pg_e, pnull_e)
-  
-  order <- 1
-  
-  while (abs(ev[length(ev)]) >= tol) {
     
-    if (order > 10) {
-      index <- which.max(ev)
-      ev <- ev[-index]
-      xv <- xv[-index]
-      order <- 10
+    while (ps < alpha) {
+      pg <- pnull
+      pnull <- (pg + 1) / 2 
+      ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
     }
-    fit <- lm(xv~poly(ev, order, raw = TRUE))
-    pnull <- fit$coefficients[[1]]
+    
+    pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
     pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
-    xv <- append(xv, pnull)
-    ev <- append(ev, pnull_e)
-    xv_log <- append(xv_log, pnull)
-    ev_log <- append(ev_log, pnull_e)
     
-    order <- order + 1
+    if (abs(pg_e) < tol)
+      return(pg)
     
+    if (abs(pnull_e) < tol)
+      return(pull)
+    
+    xv <- c(pg, pnull)
+    ev <- c(pg_e, pnull_e)
+    
+    xv_log <- c(pg, pnull)
+    ev_log <- c(pg_e, pnull_e)
+    
+    order <- 1
+    
+    while (abs(ev[length(ev)]) >= tol) {
+      
+      if (order > 10) {
+        index <- which.max(ev)
+        ev <- ev[-index]
+        xv <- xv[-index]
+        order <- 10
+      }
+      fit <- lm(xv~poly(ev, order, raw = TRUE))
+      pnull <- fit$coefficients[[1]]
+      pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+      xv <- append(xv, pnull)
+      ev <- append(ev, pnull_e)
+      xv_log <- append(xv_log, pnull)
+      ev_log <- append(ev_log, pnull_e)
+      
+      order <- order + 1
+      
+    }
+    return(list(xv = xv_log, ev = ev_log))
+  } else {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
+    pg <- pnull
+    pnull <- (pg + 0) / 2 
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    while (ps < alpha) {
+      pg <- pnull
+      pnull <- (pg + 0) / 2 
+      ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    }
+    
+    pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
+    pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+    
+    if (abs(pg_e) < tol)
+      return(pg)
+    
+    if (abs(pnull_e) < tol)
+      return(pull)
+    
+    xv <- c(pg, pnull)
+    ev <- c(pg_e, pnull_e)
+    
+    xv_log <- c(pg, pnull)
+    ev_log <- c(pg_e, pnull_e)
+    
+    order <- 1
+    
+    while (abs(ev[length(ev)]) >= tol) {
+      
+      if (order > 10) {
+        index <- which.max(ev)
+        ev <- ev[-index]
+        xv <- xv[-index]
+        order <- 10
+      }
+      fit <- lm(xv~poly(ev, order, raw = TRUE))
+      pnull <- fit$coefficients[[1]]
+      pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+      xv <- append(xv, pnull)
+      ev <- append(ev, pnull_e)
+      xv_log <- append(xv_log, pnull)
+      ev_log <- append(ev_log, pnull_e)
+      
+      order <- order + 1
+      
+    }
+    return(list(xv = xv_log, ev = ev_log))
   }
-  return(list(xv = xv_log, ev = ev_log))
+
 }
 
 findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-2) {
@@ -247,64 +305,126 @@ findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printal
   #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
 
   
-  ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  
-  if (ps > alpha) {
-    print("Current pnull already yields p value larger than alpha!")
-    return()
-  } 
-  
-  pg <- pnull
-  pnull <- (pg + 1) / 2 
-  ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  
-  while (ps < alpha) {
+  if (hnum == 1) {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
     pg <- pnull
     pnull <- (pg + 1) / 2 
     ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
-  }
-  
-  # pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
-  # pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
-  
-  pg_e <- log(SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh / alpha)
-  pnull_e <- log(SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh / alpha)
-  
-  if (abs(pg_e) < tol)
-    return(pg)
-  
-  if (abs(pnull_e) < tol)
-    return(pull)
-  
-  xv <- c(pg, pnull)
-  ev <- c(pg_e, pnull_e)
-  
-  xv_log <- c(pg, pnull)
-  ev_log <- c(pg_e, pnull_e)
-  
-  order <- 1
-  
-  while (abs(ev[length(ev)]) >= tol) {
     
-    if (order > 10) {
-      index <- which.max(ev)
-      ev <- ev[-index]
-      xv <- xv[-index]
-      order <- 10
+    while (ps < alpha) {
+      pg <- pnull
+      pnull <- (pg + 1) / 2 
+      ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
     }
-    fit <- lm(xv~poly(ev, order, raw = TRUE))
-    pnull <- fit$coefficients[[1]]
+    
+    # pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
     # pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+    
+    pg_e <- log(SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh / alpha)
     pnull_e <- log(SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh / alpha)
-    xv <- append(xv, pnull)
-    ev <- append(ev, pnull_e)
-    xv_log <- append(xv_log, pnull)
-    ev_log <- append(ev_log, pnull_e)
     
-    order <- order + 1
+    if (abs(pg_e) < tol)
+      return(pg)
     
+    if (abs(pnull_e) < tol)
+      return(pull)
+    
+    xv <- c(pg, pnull)
+    ev <- c(pg_e, pnull_e)
+    
+    xv_log <- c(pg, pnull)
+    ev_log <- c(pg_e, pnull_e)
+    
+    order <- 1
+    
+    while (abs(ev[length(ev)]) >= tol) {
+      
+      if (order > 10) {
+        index <- which.max(ev)
+        ev <- ev[-index]
+        xv <- xv[-index]
+        order <- 10
+      }
+      fit <- lm(xv~poly(ev, order, raw = TRUE))
+      pnull <- fit$coefficients[[1]]
+      # pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+      pnull_e <- log(SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh / alpha)
+      xv <- append(xv, pnull)
+      ev <- append(ev, pnull_e)
+      xv_log <- append(xv_log, pnull)
+      ev_log <- append(ev_log, pnull_e)
+      
+      order <- order + 1
+      
+    }
+    return(list(xv = xv_log, ev = ev_log))
+  } else {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
+    pg <- pnull
+    pnull <- (pg + 0) / 2 
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    while (ps < alpha) {
+      pg <- pnull
+      pnull <- (pg + 0) / 2 
+      ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    }
+    
+    # pg_e <- SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh - alpha
+    # pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+    
+    pg_e <- log(SILR(hnum, alpha = 0, pg, ri, printallps, hitfreq)$pstoohigh / alpha)
+    pnull_e <- log(SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh / alpha)
+    
+    if (abs(pg_e) < tol)
+      return(pg)
+    
+    if (abs(pnull_e) < tol)
+      return(pull)
+    
+    xv <- c(pg, pnull)
+    ev <- c(pg_e, pnull_e)
+    
+    xv_log <- c(pg, pnull)
+    ev_log <- c(pg_e, pnull_e)
+    
+    order <- 1
+    
+    while (abs(ev[length(ev)]) >= tol) {
+      
+      if (order > 10) {
+        index <- which.max(ev)
+        ev <- ev[-index]
+        xv <- xv[-index]
+        order <- 10
+      }
+      fit <- lm(xv~poly(ev, order, raw = TRUE))
+      pnull <- fit$coefficients[[1]]
+      # pnull_e <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh - alpha
+      pnull_e <- log(SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh / alpha)
+      xv <- append(xv, pnull)
+      ev <- append(ev, pnull_e)
+      xv_log <- append(xv_log, pnull)
+      ev_log <- append(ev_log, pnull_e)
+      
+      order <- order + 1
+      
+    }
+    return(list(xv = xv_log, ev = ev_log))
   }
-  return(list(xv = xv_log, ev = ev_log))
+  
 }
 
 
