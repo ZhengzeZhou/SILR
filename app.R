@@ -118,12 +118,12 @@ server <- function(input, output) {
     
     if (hnum == 3 & pmax_yn == 1){
       if (full$pstoohigh > alpha) {
-        str_full <- paste("full sample ps = ", round(full$pstoohigh, digits = 6))
+        str_full <- paste("full sample ps = ", signif(full$pstoohigh, digits = 6))
         str <- "Confidence limits on pmax and pmin are not meaningful for a some-tail test."
         
         HTML(paste(str_full, str, sep = '<br/>')) 
       } else {
-        str_full <- paste("full sample ps = ", round(full$pstoohigh, digits = 6))
+        str_full <- paste("full sample ps = ", signif(full$pstoohigh, digits = 6))
         str <- "Confidence limits on pmax and pmin are not meaningful for a some-tail test."
         
         ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
@@ -133,7 +133,7 @@ server <- function(input, output) {
       }
     
     } else if (full$pstoohigh > alpha) {
-      str_full <- paste("full sample ps = ", round(full$pstoohigh, digits = 6))
+      str_full <- paste("full sample ps = ", signif(full$pstoohigh, digits = 6))
       str <- "No confidence limits were printed because <i>ps</i> > <i>alpha</i>."
       
       HTML(paste(str_full, str, sep = '<br/>'))          
@@ -141,7 +141,7 @@ server <- function(input, output) {
     } else{
       
       if (pmax_yn == 0) {
-        str_full <- paste("full sample ps = ", round(full$pstoohigh, digits = 6))
+        str_full <- paste("full sample ps = ", signif(full$pstoohigh, digits = 6))
         
         ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
         
@@ -152,7 +152,7 @@ server <- function(input, output) {
         # HTML(paste(str_full, str1, str2, str3, sep = '<br/>'))
         HTML(paste(str_full, str3, sep = '<br/>'))
       } else {
-        str_full <- paste("full sample ps = ", round(full$pstoohigh, digits = 6))
+        str_full <- paste("full sample ps = ", signif(full$pstoohigh, digits = 6))
         
         ans = SILR(hnum = hnum, alpha = alpha, pnull = pnull, ri = ri, hitfreq = Vals())
         
