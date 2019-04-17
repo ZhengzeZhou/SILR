@@ -20,7 +20,7 @@ ui <- fluidPage(
       
       helpText(HTML("Under your null hypothesis, what is the probability of success (a hit) on each trial? This one value (call it <i>pnull</i>), must apply to all trials for all participants.")),
       
-      numericInput("pnull", label = "", value = 0.2),
+      numericInput("pnull", label = "", value = 0.2, min = 0, max = 1.0),
       
       helpText(HTML("If you reject the null hypothesis that <i>pnull</i> is the true success rate for all participants, which of the following conclusions do you want to reach in this test? (You may run this program more than once in order to test for several different conclusions).")),
       
