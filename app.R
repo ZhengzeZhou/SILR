@@ -37,11 +37,11 @@ ui <- fluidPage(
       
       helpText(HTML("Enter the value of <i>alpha</i> you want to use in finding confidence limits.")),
       
-      numericInput("alpha", label = "", value = 0.05),
+      numericInput("alpha", label = "", value = 0.05, min = 0, max = 1.0, step = 0.01),
       
       helpText(HTML("The program uses a 'rounding interval' <i>ri</i>. By default, <i>ri</i> is set to 0.01. Using a smaller value of <i>ri</i> might slightly increase the method's power, but using a larger value will speed the program up. Enter the value of <i>ri</i> you want to use.")),
       
-      numericInput("ri", label = "", value = 0.01),
+      numericInput("ri", label = "", value = 0.01, min = 0, max = 1.0, step = 0.01),
       
       helpText(HTML("Do you want to find a confidence limit on <i>pmax</i> or <i>pmin</i>?")),
       
@@ -72,23 +72,53 @@ server <- function(input, output) {
     as.numeric(unlist(strsplit(input$hitfreq,",")))
   })
   
+  Valsstr <- eventReactive(input$go, {
+    input$hitfreq
+  })
+  
+  Pnull <- eventReactive(input$go, {
+    input$pnull
+  })
+  
+  Type <- eventReactive(input$go, {
+    input$type
+  })
+  
+  Alpha <- eventReactive(input$go, {
+    input$alpha
+  })
+  
+  Ri <- eventReactive(input$go, {
+    input$ri
+  })
+  
+  Ri <- eventReactive(input$go, {
+    input$ri
+  })
+  
+  Pmax <- eventReactive(input$go, {
+    input$pmax
+  }) 
+  
   # output$entered_vec <- renderText({
   #   paste("You have entered", Vals())
   # })
   
   output$input <- renderUI({ 
+    
+    
     hnum <- switch(input$type, 
                    "upper-tail" = 1,
                    "lower-tail" = 2,
                    "some-tail" = 3)
     
     str_N <- paste("number of participants <i>N</i> = ", sum(Vals()))
-    str_type <- paste("type of test = ", input$type)
+    str_type <- paste("type of test = ", Type())
     str_t <- paste("number of binary trials <i>t</i> for each participant = ", length(Vals()) - 1)
-    str_pnull <- paste("<i>pnull</i> = ", input$pnull)
-    str_ri <- paste("rounding interval <i>ri</i> = ", input$ri)
-    str_alpha <- paste("significance level <i>alpha</i> = ", input$alpha)
-    str_hitfreq <- paste("number of participants with each possible number of hits = ", input$hitfreq)
+    str_pnull <- paste("<i>pnull</i> = ", Pnull())
+    str_ri <- paste("rounding interval <i>ri</i> = ", Ri())
+    str_alpha <- paste("significance level <i>alpha</i> = ", Alpha())
+    str_hitfreq <- paste("number of participants with each possible number of hits = ", Valsstr())
     
     
     HTML(paste(str_type, str_N, str_t, str_pnull, str_ri, str_alpha, str_hitfreq, sep = '<br/>'))
@@ -96,18 +126,18 @@ server <- function(input, output) {
   })  
 
   output$result <- renderUI({ 
-    hnum <- switch(input$type, 
+    hnum <- switch(Type(), 
                   "upper-tail" = 1,
                   "lower-tail" = 2,
                   "some-tail" = 3)
     
-    alpha <- input$alpha
+    alpha <- Alpha()
     
-    pnull <- input$pnull
+    pnull <- Pnull()
     
-    ri <- input$ri
+    ri <- Ri()
     
-    pmax_yn <- switch(input$pmax, 
+    pmax_yn <- switch(Pmax(), 
                    "yes" = 1,
                    "no" = 0)
     
