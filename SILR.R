@@ -427,4 +427,74 @@ findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printal
   
 }
 
+findPmaxBinary <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-3) {
+  # Same functionality as findPmax, except that we use binary search. 
+  #
+  # Args:
+  #   hum: Integer denoting type of test. 1 for an upper-tail test;2 for a lower-tail test; 3 for a some-tail test. 
+  #        Default is 1.
+  #   alpha: Significance level. Default is 0.05.
+  #   pnull: Probability of success (a hit) on each trial under null hypothesis. Default to 0.04.
+  #   ri: Rounding interval. Default is 0.01. 
+  #   printallps: Whether to print all values of ps. 1 for Yes and 0 for No. Default is 0. Note that this feature 
+  #               is not displayed in the Shiny app currently.
+  #   hitfreq: Vector of length t+1. It is the number of participants who achieved each number of successes from 0 to t.
+  #            Default set to c(1, 5, 10, 10, 6, 5).
+  #   tol: Tolerance level denote the accuracy of final result. Default is 0.01.
+  #
+  # Returns:
+  #   List containing:
+  #     xv_log: Vector containing values of pnulls tried in each iteration. 
+  #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
+  
+  
+  if (hnum == 1) {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
+    left <- pnull
+    right <- 1
+    
+    while (abs(ps - alpha) > tol) {
+      mid <- (left + right) / 2
+      ps <- SILR(hnum, alpha = 0, mid, ri, printallps, hitfreq)$pstoohigh 
+      if (ps > alpha) {
+        right <- mid
+      } else {
+        left <- mid
+      }
+    }
+    
+    return(mid)
+    
+  } else {
+    ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
+    
+    if (ps > alpha) {
+      print("Current pnull already yields p value larger than alpha!")
+      return()
+    } 
+    
+    left <- 0
+    right <- pnull
+    
+    while (abs(ps - alpha) > tol) {
+      mid <- (left + right) / 2
+      ps <- SILR(hnum, alpha = 0, mid, ri, printallps, hitfreq)$pstoohigh 
+      if (ps > alpha) {
+        left <- mid
+      } else {
+        right <- mid
+      }
+    }
+    
+    return(mid)
+  }
+  
+}
+
 

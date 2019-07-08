@@ -190,14 +190,14 @@ server <- function(input, output) {
         # str2 <- paste("ntoolarge = ", ans$ntoolarge, ", ", "pstoolow = ", ans$pstoolow)
         str3 <- paste("lower confidence limit on the number of experimental participants with the trait of interest = ", ans$withtrait)
         
-        ans = findPmaxlog(hnum, alpha, pnull = pnull, ri = ri, printallps = 0, hitfreq = Vals(), tol = 1e-2)
+        ans = findPmaxBinary(hnum, alpha, pnull = pnull, ri = ri, printallps = 0, hitfreq = Vals(), tol = 1e-2)
         
         if (hnum == 1) {
-          pmax = ans$xv[length(ans$xv)]
+          pmax = ans
           
           str4 <- paste("lower confidence limit on pmax = ", round(pmax, digits = 6))
         } else {
-          pmin = ans$xv[length(ans$xv)]
+          pmin = ans
           
           str4 <- paste("upper confidence limit on pmin = ", round(pmin, digits = 6))
         }
