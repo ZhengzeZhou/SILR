@@ -21,7 +21,6 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
 
   n <- sum(hitfreq) # the number of participants
 
-
   t = length(hitfreq) - 1
   
   xup <- 0:t
@@ -52,8 +51,10 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
   gcum <- rep(0, n)
   start <- 1
   for (index in order_index) {
-    gcum[start:(start + hitfreq[index] - 1)] <- gvec[index]
-    start <- start + hitfreq[index]
+    if (hitfreq[index] > 0) {
+      gcum[start:(start + hitfreq[index] - 1)] <- gvec[index]
+      start <- start + hitfreq[index]
+    }
   }
   gcum <- cumsum(gcum)
 
@@ -141,6 +142,7 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
       pstoohigh <- newps
       maxnsn <- nt
       maxnsvec <- newvec
+      store[[toString(nt)]] <- newvec
     }
   }
 
