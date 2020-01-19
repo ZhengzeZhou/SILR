@@ -16,11 +16,11 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
   #            Default set to c(6, 10, 8, 5, 4, 2).
   #
   # Returns:
-  #   List containing maxnsn, pstoohigh, ntoolarge, pstoolow and withtrait.
+  #   List containing lowern, pstoohigh, uppern, pstoolow and withtrait.
   
-
+  
   n <- sum(hitfreq) # the number of participants
-
+  
   t = length(hitfreq) - 1
   
   xup <- 0:t
@@ -30,9 +30,9 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
   probH0 <- factorial(t) / (factorial(xup) * factorial(t - xup)) * pnull ^ xup * (1 - pnull) ^ (t - xup) 
   # entry j is the probability of j-1 hits under the H which maximized that probability
   probH1 <- factorial(t) / (factorial(xup) * factorial(t - xup)) * (xup / t) ^ xup * (1 - xup / t) ^ (t - xup)
-
+  
   gvec <- log(probH1 / probH0) # logarithm of the reciprocal of a likelihood ratio
-
+  
   # set some values in gvec to 0 based on which test
   if (hnum == 1){
     nbelow <- sum(xup / t < pnull - 0.00001)
@@ -41,13 +41,13 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
     nabove <- sum(xup / t > pnull + 0.00001)
     gvec[(t - nabove + 2):(t + 1)] <- 0
   }
-
+  
   gvec <- ri * round(gvec/ri)
   g <- hitfreq %*% gvec
   gcn <- round(g / ri + 1)
-
+  
   order_index <- order(gvec)
-
+  
   gcum <- rep(0, n)
   start <- 1
   for (index in order_index) {
@@ -57,23 +57,23 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
     }
   }
   gcum <- cumsum(gcum)
-
+  
   p1cellnum <- round(gvec/ri + 1)
   numcellsp1 <- max(p1cellnum)
   p1 <- rep(0, numcellsp1)
   for (i in 1:(t + 1)) {
     p1[p1cellnum[i]] <- p1[p1cellnum[i]] + probH0[i]
   }
-
+  
   store <- list()
   store[["1"]] <- p1
-
+  
   # Doubling convolutions
   nt <- 1
   currentvec <- p1
-  ntoolarge <- n + 1
+  uppern <- n + 1
   pstoolow <- -1
-
+  
   while (2 * nt <= n) { 
     # convolve
     # newvec <- convolve(currentvec, rev(currentvec), type = "open")
@@ -94,7 +94,7 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
       print(newps)
     }
     if (newps < alpha) {
-      ntoolarge <- nt
+      uppern <- nt
       pstoolow <- newps
     } else {
       pstoohigh <- newps
@@ -102,17 +102,17 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
     
     
     if (newps > alpha) {
-      maxnsn <- nt
+      lowern <- nt
       maxnsvec <- newvec
       store[[toString(nt)]] <- newvec
       currentvec <- newvec
     }
   } 
-
+  
   # Phase 2
-
-  while (ntoolarge - maxnsn > 1) {
-    maxntoadd <- ntoolarge - maxnsn - 1
+  
+  while (uppern - lowern > 1) {
+    maxntoadd <- uppern - lowern - 1
     
     for (i in rev(names(store))) {
       if (as.integer(i) <= maxntoadd) {
@@ -124,7 +124,7 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
     vectoadd <- store[[toString(ntoadd)]]
     # newvec <- convolve(maxnsvec, rev(vectoadd), type = "open")
     newvec <- rcpp_convolve(maxnsvec, vectoadd)
-    nt <- maxnsn + ntoadd
+    nt <- lowern + ntoadd
     currentcell <- round(gcum[nt] / ri) + 1
     newps <- sum(newvec[currentcell:length(newvec)])
     
@@ -136,20 +136,20 @@ SILR <- function(hnum = 1, alpha = 0.05, pnull = 0.2, ri = 0.01, printallps = 0,
     }
     
     if (newps < alpha) {
-      ntoolarge <- nt
+      uppern <- nt
       pstoolow <- newps
     } else {
       pstoohigh <- newps
-      maxnsn <- nt
+      lowern <- nt
       maxnsvec <- newvec
       store[[toString(nt)]] <- newvec
     }
   }
-
-  my_list <- list("maxnsn" = maxnsn, "pstoohigh" = pstoohigh, "ntoolarge" = ntoolarge, "pstoolow" = pstoolow, "withtrait" = n - maxnsn)
-
+  
+  my_list <- list("lowern" = lowern, "pstoohigh" = pstoohigh, "uppern" = uppern, "pstoolow" = pstoolow, "withtrait" = n - lowern)
+  
   return(my_list)
-
+  
 }
 
 findPmax <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-2) {
@@ -283,7 +283,7 @@ findPmax <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps
     }
     return(list(xv = xv_log, ev = ev_log))
   }
-
+  
 }
 
 findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printallps = 0, hitfreq = c(1, 5, 10, 10, 6, 5), tol = 1e-2) {
@@ -305,7 +305,7 @@ findPmaxlog <- function(hnum = 1, alpha = 0.05, pnull = 0.04, ri = 0.01, printal
   #   List containing:
   #     xv_log: Vector containing values of pnulls tried in each iteration. 
   #     ev_log: Vector containing errors to the desired pvalue in each iteration. 
-
+  
   
   if (hnum == 1) {
     ps <- SILR(hnum, alpha = 0, pnull, ri, printallps, hitfreq)$pstoohigh
